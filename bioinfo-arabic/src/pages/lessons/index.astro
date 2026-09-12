@@ -1,0 +1,33 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const lessons = await getCollection("lessons");
+lessons.sort((a, b) => (b.data.date || "").localeCompare(a.data.date || ""));
+---
+<BaseLayout title="الدروس — معلوماتية حيوية">
+  <section style="max-width:900px;margin:0 auto;padding:50px 24px 80px;">
+    <h2 style="font-size:1.6rem;margin-bottom:6px;">الدروس</h2>
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:22px;">قائمة الدروس المترجمة والمشروحة</p>
+    <table style="width:100%;border-collapse:collapse;font-size:0.95rem;">
+      <thead>
+        <tr>
+          <th style="text-align:start;color:var(--muted);font-weight:500;font-size:0.82rem;border-bottom:1px solid var(--border);padding:8px 10px;">نوع الترجمة</th>
+          <th style="text-align:start;color:var(--muted);font-weight:500;font-size:0.82rem;border-bottom:1px solid var(--border);padding:8px 10px;">الدرس</th>
+          <th style="text-align:start;color:var(--muted);font-weight:500;font-size:0.82rem;border-bottom:1px solid var(--border);padding:8px 10px;">المستوى</th>
+        </tr>
+      </thead>
+      <tbody>
+        {lessons.map((lesson) => (
+          <tr>
+            <td style="padding:12px 10px;border-bottom:1px solid var(--border);color:var(--muted);font-size:0.85rem;">{lesson.data.translationType}</td>
+            <td style="padding:12px 10px;border-bottom:1px solid var(--border);">
+              <a href={`/lessons/${lesson.slug}/`} style="color:var(--text);text-decoration:none;font-weight:700;">{lesson.data.title}</a>
+            </td>
+            <td style="padding:12px 10px;border-bottom:1px solid var(--border);color:var(--muted);font-size:0.85rem;">{lesson.data.difficulty}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</BaseLayout>

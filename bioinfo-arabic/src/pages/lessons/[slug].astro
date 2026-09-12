@@ -1,0 +1,29 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const lessons = await getCollection("lessons");
+  return lessons.map((lesson) => ({
+    params: { slug: lesson.slug },
+    props: { lesson },
+  }));
+}
+
+const { lesson } = Astro.props;
+const { Content } = await lesson.render();
+---
+<BaseLayout title={`${lesson.data.title} — معلوماتية حيوية`}>
+  <div style="max-width:820px;margin:0 auto;padding:40px 24px 80px;">
+    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:18px;">
+      <a href="/lessons/" style="color:var(--muted);text-decoration:none;">الدروس</a> ← {lesson.data.category}
+    </div>
+    <h1 style="font-size:1.7rem;margin:0 0 4px;">{lesson.data.title}</h1>
+    <div style="color:var(--muted);font-size:0.85rem;margin-bottom:28px;">
+      {lesson.data.date} · {lesson.data.translationType} · المستوى: {lesson.data.difficulty}
+    </div>
+    <div style="border:1px solid var(--border);border-radius:6px;padding:24px 26px;font-size:0.98rem;line-height:1.9;">
+      <Content />
+    </div>
+  </div>
+</BaseLayout>

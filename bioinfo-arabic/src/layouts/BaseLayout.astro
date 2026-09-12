@@ -1,0 +1,38 @@
+---
+export interface Props {
+  title?: string;
+}
+const { title = "معلوماتية حيوية" } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/styles/global.css" />
+</head>
+<body>
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:26px 48px;">
+    <div style="font-weight:900;font-size:1.05rem;display:flex;align-items:center;gap:8px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:#111;display:inline-block;"></span>
+      معلوماتية حيوية
+    </div>
+    <nav style="display:flex;align-items:center;gap:34px;">
+      <a href="/lessons/">الدروس</a>
+      <a href="/dictionary/">القاموس</a>
+      <a href="/about/">عن المشروع</a>
+    </nav>
+  </header>
+
+  <main>
+    <slot />
+  </main>
+
+  <footer style="text-align:center;color:var(--muted);font-size:0.85rem;padding:30px 20px 50px;">
+    مشروع مفتوح المصدر لترجمة دروس المعلوماتية الحيوية إلى العربية · مستضاف على GitHub Pages
+  </footer>
+</body>
+</html>

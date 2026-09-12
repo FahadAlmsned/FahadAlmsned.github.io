@@ -1,0 +1,163 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout title="معلوماتية حيوية وأكثر">
+  <section id="heroStage" style="display:grid;grid-template-columns:1.05fr 1fr;align-items:center;gap:40px;padding:20px 48px 60px;max-width:1300px;margin:0 auto;">
+    <div>
+      <h1 style="font-size:4.2rem;font-weight:900;line-height:1.1;margin:0 0 26px;letter-spacing:-1px;">
+        معلوماتية حيوية<br />وأكثر
+      </h1>
+      <div id="typewriter" style="font-family:'IBM Plex Mono', monospace;font-size:1.05rem;">
+        <span id="typewriter-text"></span><span style="display:inline-block;width:2px;background:#111;margin-inline-start:2px;">&nbsp;</span>
+      </div>
+    </div>
+    <div id="illustrationWrap" style="position:relative;display:flex;justify-content:center;align-items:center;height:420px;">
+      <canvas id="dnaCanvas" style="width:100%;max-width:460px;height:420px;"></canvas>
+      <div id="baseTooltip" style="display:none;position:absolute;bottom:34px;right:0;left:0;margin:0 auto;max-width:300px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.1);text-align:center;font-size:0.85rem;">
+        <b id="tipCode"></b> — <span id="tipDesc"></span>
+      </div>
+      <div style="position:absolute;bottom:6px;right:0;left:0;text-align:center;font-size:0.78rem;color:var(--muted);font-family:'IBM Plex Mono', monospace;">
+        حرّك الفأرة، واضغط على أي قاعدة
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1300px;margin:0 auto;padding:60px 48px 100px;display:grid;grid-template-columns:repeat(3,1fr);gap:40px;border-top:1px solid var(--border);">
+    <a href="/lessons/" class="feature" style="text-decoration:none;color:inherit;padding:20px;border-radius:10px;">
+      <div style="height:4px;width:36px;border-radius:2px;background:var(--blue);margin-bottom:22px;"></div>
+      <h3 style="font-size:1.5rem;font-weight:900;margin:0 0 16px;">الدروس</h3>
+      <p style="font-size:1rem;line-height:1.85;color:#333;">
+        <b>ترجمة مباشرة وشرح مبسّط</b> لدروس المعلوماتية الحيوية، من أساسيات الحمض النووي إلى الخوارزميات الحيوية، لكل المستويات.
+      </p>
+    </a>
+    <a href="/dictionary/" class="feature" style="text-decoration:none;color:inherit;padding:20px;border-radius:10px;">
+      <div style="height:4px;width:36px;border-radius:2px;background:var(--green);margin-bottom:22px;"></div>
+      <h3 style="font-size:1.5rem;font-weight:900;margin:0 0 16px;">القاموس</h3>
+      <p style="font-size:1rem;line-height:1.85;color:#333;">
+        <b>مصطلحات إنجليزية بتعريفات عربية</b> واضحة ومتّسقة، مرتبطة مباشرة بكل درس.
+      </p>
+    </a>
+    <a href="/about/" class="feature" style="text-decoration:none;color:inherit;padding:20px;border-radius:10px;">
+      <div style="height:4px;width:36px;border-radius:2px;background:var(--orange);margin-bottom:22px;"></div>
+      <h3 style="font-size:1.5rem;font-weight:900;margin:0 0 16px;">عن المشروع</h3>
+      <p style="font-size:1rem;line-height:1.85;color:#333;">
+        مبادرة مفتوحة المصدر لتقريب <b>المعلوماتية الحيوية وحقول علمية أخرى</b> من القارئ العربي.
+      </p>
+    </a>
+  </section>
+
+  <script>
+    const phrases = [
+      "دروس، ترجمة، تفاعل ...",
+      "من DNA إلى الخوارزميات ...",
+      "قاموس عربي لكل مصطلح ...",
+      "تعلّم باللعب والتجربة ..."
+    ];
+    const twEl = document.getElementById("typewriter-text");
+    let phraseIndex = 0, charIndex = 0, deleting = false;
+    function typeLoop() {
+      const current = phrases[phraseIndex];
+      if (!deleting) {
+        charIndex++;
+        twEl.textContent = current.slice(0, charIndex);
+        if (charIndex === current.length) { deleting = true; setTimeout(typeLoop, 1800); return; }
+      } else {
+        charIndex--;
+        twEl.textContent = current.slice(0, charIndex);
+        if (charIndex === 0) { deleting = false; phraseIndex = (phraseIndex + 1) % phrases.length; }
+      }
+      setTimeout(typeLoop, deleting ? 35 : 55);
+    }
+    typeLoop();
+
+    const canvas = document.getElementById("dnaCanvas");
+    const ctx = canvas.getContext("2d");
+    const wrap = document.getElementById("illustrationWrap");
+    function resizeCanvas() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    const colorMap = { A: "#e0574c", T: "#f2a33d", G: "#4caf50", C: "#1a73c4" };
+    const pairMap = { A: "T", T: "A", G: "C", C: "G" };
+    const infoText = {
+      A: { name: "الأدينين", desc: "يرتبط دائمًا بالثايمين (T)" },
+      T: { name: "الثايمين", desc: "يرتبط دائمًا بالأدينين (A)" },
+      G: { name: "الغوانين", desc: "يرتبط دائمًا بالسيتوزين (C)" },
+      C: { name: "السيتوزين", desc: "يرتبط دائمًا بالغوانين (G)" }
+    };
+    const rungCount = 16;
+    let rungData = [];
+    for (let i = 0; i < rungCount; i++) rungData.push(["A","T","G","C"][Math.floor(Math.random()*4)]);
+
+    let angleOffset = 0, targetTiltX = 0, targetTiltY = 0, curTiltX = 0, curTiltY = 0, hitboxes = [];
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cx = canvas.width / 2, cy = canvas.height / 2, radius = 55;
+      const spacing = canvas.height / (rungCount + 1);
+      hitboxes = [];
+      const cosT = Math.cos(curTiltY * Math.PI/180);
+      const sinT = Math.sin(curTiltY * Math.PI/180);
+      const rungs = [];
+      for (let i = 0; i < rungCount; i++) {
+        const y = spacing * (i + 1) - canvas.height/2 + curTiltX * 2;
+        const angle = (i * 32 + angleOffset) * Math.PI / 180;
+        let x1 = Math.cos(angle) * radius, z1 = Math.sin(angle) * radius;
+        let x2 = Math.cos(angle + Math.PI) * radius, z2 = Math.sin(angle + Math.PI) * radius;
+        const rx1 = x1 * cosT - z1 * sinT, rx2 = x2 * cosT - z2 * sinT;
+        rungs.push({ x1: rx1, z1, x2: rx2, z2, y, code1: rungData[i], code2: pairMap[rungData[i]] });
+      }
+      for (let i = 0; i < rungs.length - 1; i++) {
+        const a = rungs[i], b = rungs[i+1];
+        ctx.strokeStyle = "#d8d8d8"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx + a.x1, cy + a.y); ctx.lineTo(cx + b.x1, cy + b.y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + a.x2, cy + a.y); ctx.lineTo(cx + b.x2, cy + b.y); ctx.stroke();
+      }
+      rungs.forEach(r => {
+        ctx.strokeStyle = "#eee"; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(cx + r.x1, cy + r.y); ctx.lineTo(cx + r.x2, cy + r.y); ctx.stroke();
+        const scale1 = 0.7 + 0.5 * ((r.z1/radius + 1)/2);
+        const scale2 = 0.7 + 0.5 * ((r.z2/radius + 1)/2);
+        const rad1 = 9 * scale1, rad2 = 9 * scale2;
+        ctx.beginPath(); ctx.arc(cx + r.x1, cy + r.y, rad1, 0, Math.PI*2); ctx.fillStyle = colorMap[r.code1]; ctx.fill();
+        hitboxes.push({ x: cx + r.x1, y: cy + r.y, r: rad1 + 4, code: r.code1 });
+        ctx.beginPath(); ctx.arc(cx + r.x2, cy + r.y, rad2, 0, Math.PI*2); ctx.fillStyle = colorMap[r.code2]; ctx.fill();
+        hitboxes.push({ x: cx + r.x2, y: cy + r.y, r: rad2 + 4, code: r.code2 });
+      });
+    }
+    function animate() {
+      angleOffset += 0.6;
+      curTiltX += (targetTiltX - curTiltX) * 0.08;
+      curTiltY += (targetTiltY - curTiltY) * 0.08;
+      render();
+      requestAnimationFrame(animate);
+    }
+    animate();
+    wrap.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const relX = (e.clientX - rect.left) / rect.width - 0.5;
+      const relY = (e.clientY - rect.top) / rect.height - 0.5;
+      targetTiltY = relX * 60; targetTiltX = relY * -10;
+    });
+    wrap.addEventListener("mouseleave", () => { targetTiltY = 0; targetTiltX = 0; });
+
+    const tooltip = document.getElementById("baseTooltip");
+    const tipCode = document.getElementById("tipCode");
+    const tipDesc = document.getElementById("tipDesc");
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      for (let i = hitboxes.length - 1; i >= 0; i--) {
+        const h = hitboxes[i];
+        const d = Math.sqrt((mx-h.x)**2 + (my-h.y)**2);
+        if (d < h.r) {
+          const info = infoText[h.code];
+          tipCode.textContent = info.name + " (" + h.code + ")";
+          tipDesc.textContent = info.desc;
+          tooltip.style.display = "block";
+          break;
+        }
+      }
+    });
+  </script>
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const terms = await getCollection("dictionary");
+terms.sort((a, b) => a.data.term_en.localeCompare(b.data.term_en));
+---
+<BaseLayout title="القاموس — معلوماتية حيوية">
+  <section style="max-width:900px;margin:0 auto;padding:50px 24px 80px;">
+    <h2 style="font-size:1.6rem;margin-bottom:20px;">القاموس</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));gap:18px;">
+      {terms.map(async (term) => {
+        const { Content } = await term.render();
+        return (
+          <div style="border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-size:0.9rem;">
+            <span class="ltr-mono" style="font-size:0.85rem;">{term.data.term_en}</span>
+            <div style="margin-top:6px;font-weight:700;">{term.data.term_ar}</div>
+            <div style="margin-top:4px;color:#333;"><Content /></div>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+</BaseLayout>
